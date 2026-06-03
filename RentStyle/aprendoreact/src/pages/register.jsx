@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import '../components/Footer';
 import '../styles/register.css';
 
 const MAX_AVATAR_MB = 5;
