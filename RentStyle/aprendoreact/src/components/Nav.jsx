@@ -1,33 +1,21 @@
+import { Link } from 'react-router-dom';
 import Header from "./Header";
 
-function Nav () {
-    return (
-            <nav className="app-nav">
-        <div className="nav-inner">
-
-        <a href="/" className="brand">
-                <Header />
-
-        </a>
-
+function Nav() {
+  return (
+    <nav className="app-nav">
+      <div className="nav-inner">
+        <Link to="/" className="brand">
+          <Header />
+        </Link>
         <div className="nav-actions">
-
-            <button onclick="toggleTheme()">
-                Tema
-            </button>
-
-            <a href="login.html">
-            Iniciar sesión
-            </a>
-
-            <a href="register.html">
-            Registrarse
-            </a>
-
+          <button onClick={() => {}}>Tema</button>
+          <Link to="/login">Iniciar sesión</Link>
+          <Link to="/registro">Registrarse</Link>
         </div>
-
-        </div>
+      </div>
     </nav>
-    );
+  );
 }
+
 export default Nav;
