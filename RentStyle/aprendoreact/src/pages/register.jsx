@@ -1,4 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 import '../styles/register.css';
 
 const MAX_AVATAR_MB = 5;
@@ -24,20 +26,15 @@ function measureStrength(pw) {
 }
 
 const STRENGTH_DATA = [
-  { label: '–',       cls: '' },
+  { label: '–',       cls: '',       color: 'var(--text-muted)' },
   { label: 'Débil',   cls: 'weak',   color: 'var(--color-error)' },
   { label: 'Regular', cls: 'fair',   color: 'var(--color-warning)' },
-  { label: 'Buena',   cls: 'good',   color: '#7ab8e0' },
-  { label: 'Fuerte',  cls: 'strong', color: 'var(--color-success)' },
+  { label: 'Buena',   cls: 'good',   color: '#5aabdf' },
+  { label: 'Fuerte',  cls: 'strong', color: 'var(--primary)' },
 ];
 
-const INITIAL_FORM = {
-  name: '', email: '', password: '', confirm: '', terms: false,
-};
-
-const INITIAL_ERRORS = {
-  name: '', email: '', password: '', confirm: '', terms: '', avatar: '',
-};
+const INITIAL_FORM   = { name: '', email: '', password: '', confirm: '', terms: false };
+const INITIAL_ERRORS = { name: '', email: '', password: '', confirm: '', terms: '', avatar: '' };
 
 export default function Register() {
   const [formData,     setFormData]     = useState(INITIAL_FORM);
@@ -49,27 +46,15 @@ export default function Register() {
   const [dragging,     setDragging]     = useState(false);
   const [loading,      setLoading]      = useState(false);
   const [toast,        setToast]        = useState({ show: false, msg: '', type: 'success' });
-  const [darkMode,     setDarkMode]     = useState(
-    () => localStorage.getItem('rs-theme') !== 'light'
-  );
+  const [darkMode,     setDarkMode]     = useState(false);
 
   const avatarInputRef = useRef(null);
   const toastTimer     = useRef(null);
 
-  const toggleTheme = useCallback(() => {
-    const next = !darkMode;
-    setDarkMode(next);
-    document.body.classList.toggle('light', !next);
-    localStorage.setItem('rs-theme', next ? 'dark' : 'light');
-  }, [darkMode]);
-
   const showToast = useCallback((msg, type = 'success') => {
     clearTimeout(toastTimer.current);
     setToast({ show: true, msg, type });
-    toastTimer.current = setTimeout(
-      () => setToast(t => ({ ...t, show: false })),
-      3500
-    );
+    toastTimer.current = setTimeout(() => setToast(t => ({ ...t, show: false })), 3500);
   }, []);
 
   const setError = useCallback((field, msg) => {
@@ -91,30 +76,26 @@ export default function Register() {
     const v = value.trim();
     if (!v)                      { setError('name', 'El nombre es obligatorio.');           return false; }
     if (v.length < MIN_NAME_LEN) { setError('name', `Mínimo ${MIN_NAME_LEN} caracteres.`); return false; }
-    if (!/^[a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s'-]+$/u.test(v)) {
-                                   setError('name', 'Solo letras, espacios o guiones.');    return false; }
+    if (!/^[a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s'-]+$/u.test(v)) { setError('name', 'Solo letras, espacios o guiones.'); return false; }
     setValid('name'); return true;
   }, [formData.name, setError, setValid]);
 
   const validateEmail = useCallback((value = formData.email) => {
     const v = value.trim();
-    if (!v)                                          { setError('email', 'El correo es obligatorio.'); return false; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v))   { setError('email', 'Ingresa un correo válido.'); return false; }
+    if (!v)                                        { setError('email', 'El correo es obligatorio.'); return false; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) { setError('email', 'Ingresa un correo válido.'); return false; }
     setValid('email'); return true;
   }, [formData.email, setError, setValid]);
 
   const validatePassword = useCallback((value = formData.password) => {
-    if (!value)                    { setError('password', 'La contraseña es obligatoria.');      return false; }
-    if (value.length < MIN_PW_LEN) { setError('password', `Mínimo ${MIN_PW_LEN} caracteres.`);  return false; }
+    if (!value)                    { setError('password', 'La contraseña es obligatoria.');     return false; }
+    if (value.length < MIN_PW_LEN) { setError('password', `Mínimo ${MIN_PW_LEN} caracteres.`); return false; }
     setValid('password'); return true;
   }, [formData.password, setError, setValid]);
 
-  const validateConfirm = useCallback((
-    confirmVal  = formData.confirm,
-    passwordVal = formData.password
-  ) => {
-    if (!confirmVal)                { setError('confirm', 'Confirma tu contraseña.');          return false; }
-    if (confirmVal !== passwordVal) { setError('confirm', 'Las contraseñas no coinciden.');    return false; }
+  const validateConfirm = useCallback((confirmVal = formData.confirm, passwordVal = formData.password) => {
+    if (!confirmVal)                { setError('confirm', 'Confirma tu contraseña.');        return false; }
+    if (confirmVal !== passwordVal) { setError('confirm', 'Las contraseñas no coinciden.');  return false; }
     setValid('confirm'); return true;
   }, [formData.confirm, formData.password, setError, setValid]);
 
@@ -127,9 +108,7 @@ export default function Register() {
     const { name, value, type, checked } = e.target;
     const newValue = type === 'checkbox' ? checked : value;
     setFormData(prev => ({ ...prev, [name]: newValue }));
-    if (name === 'password') {
-      setPwStrength(value ? measureStrength(value) : 0);
-    }
+    if (name === 'password') setPwStrength(value ? measureStrength(value) : 0);
   }, []);
 
   const handleBlur = useCallback((e) => {
@@ -142,14 +121,11 @@ export default function Register() {
 
   const handleAvatarFile = useCallback((file) => {
     if (!file) return;
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!validTypes.includes(file.type)) {
-      setError('avatar', 'Solo se permiten imágenes JPG, PNG o WEBP.');
-      return;
+    if (!['image/jpeg','image/png','image/webp'].includes(file.type)) {
+      setError('avatar', 'Solo se permiten imágenes JPG, PNG o WEBP.'); return;
     }
     if (file.size > MAX_AVATAR_MB * 1024 * 1024) {
-      setError('avatar', `La imagen no puede superar ${MAX_AVATAR_MB} MB.`);
-      return;
+      setError('avatar', `La imagen no puede superar ${MAX_AVATAR_MB} MB.`); return;
     }
     clearField('avatar');
     const reader = new FileReader();
@@ -157,42 +133,24 @@ export default function Register() {
     reader.readAsDataURL(file);
   }, [setError, clearField]);
 
-  const handleAvatarChange = (e) => handleAvatarFile(e.target.files?.[0]);
-
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     setDragging(false);
     handleAvatarFile(e.dataTransfer?.files?.[0]);
   }, [handleAvatarFile]);
 
-  const handleAvatarKeyDown = (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      avatarInputRef.current?.click();
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const ok = [
-      validateName(),
-      validateEmail(),
-      validatePassword(),
-      validateConfirm(),
-      validateTerms(),
-    ].every(Boolean);
+    const ok = [validateName(), validateEmail(), validatePassword(), validateConfirm(), validateTerms()].every(Boolean);
     if (!ok) return;
-
     setLoading(true);
     try {
       const passwordHash = await hashPassword(formData.password);
       const payload = {
-        fullName:     formData.name.trim(),
-        email:        formData.email.trim().toLowerCase(),
+        fullName: formData.name.trim(),
+        email:    formData.email.trim().toLowerCase(),
         passwordHash,
-        role:         'cliente',
-        active:       true,
-        createdAt:    new Date().toISOString(),
+        role: 'cliente', active: true, createdAt: new Date().toISOString(),
       };
       await new Promise(res => setTimeout(res, 1400));
       console.info('[RentStyle] Registro OK →', payload);
@@ -212,6 +170,8 @@ export default function Register() {
     return 'field-group';
   };
 
+  const strengthInfo = STRENGTH_DATA[pwStrength];
+
   const EyeIcon = showPassword ? (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
@@ -225,236 +185,149 @@ export default function Register() {
     </svg>
   );
 
-  const strengthInfo = STRENGTH_DATA[pwStrength];
-  const StrengthBars = (
-    <div className={`pw-strength${formData.password ? ' visible' : ''}`} aria-live="polite">
-      <div className="pw-bars">
-        {[1, 2, 3, 4].map(i => (
-          <span key={i} className={`bar${i <= pwStrength ? ` ${strengthInfo.cls}` : ''}`} />
-        ))}
-      </div>
-      <span className="pw-label" style={{ color: strengthInfo.color }}>
-        {strengthInfo.label}
-      </span>
-    </div>
-  );
-
   return (
     <>
-      <nav className="app-nav">
-        <div className="nav-inner">
-          <a href="/" className="brand">
-            <span className="brand-icon">RS</span>
-            RentStyle
-          </a>
-          <div className="nav-actions">
-            <button className="btn-theme" onClick={toggleTheme} aria-label="Cambiar tema">
-              <span className="theme-icon">◐</span>
+      <Header />
+
+      <nav className="register-nav">
+        <div className="register-nav-inner">
+          <h2 className="register-logo">RentStyle</h2>
+          <div className="register-nav-links">
+            <button className="theme-toggle-register" onClick={() => setDarkMode(!darkMode)}>
+              <div className="theme-icon-register" />
             </button>
-            <a href="/login" className="btn-login">Iniciar sesión</a>
+            <a href="/">Inicio</a>
+            <a href="/login">Iniciar sesión</a>
           </div>
         </div>
       </nav>
 
-      <main className="page-layout">
-        <aside className="side-panel">
-          <div className="side-content">
-            <p className="side-eyebrow">Bienvenido a</p>
-            <h1 className="side-title">RentStyle</h1>
-            <p className="side-desc">
-              Alquila lo que necesitas, cuando lo necesitas.
-              Moda, tecnología y más — sin el compromiso de comprar.
-            </p>
-            <ul className="features-list">
-              <li><span className="feat-icon">✦</span><span>Catálogo actualizado</span></li>
-              <li><span className="feat-icon">✦</span><span>Reservas flexibles</span></li>
-              <li><span className="feat-icon">✦</span><span>Cancelación sin cargos</span></li>
-            </ul>
-          </div>
-          <div className="side-decoration" aria-hidden="true">
-            <div className="deco-circle deco-1" />
-            <div className="deco-circle deco-2" />
-            <div className="deco-circle deco-3" />
-          </div>
-        </aside>
+      <div className={`register-page${darkMode ? ' dark' : ''}`}>
 
-        <section className="form-section">
-          <div className="form-card">
-            <div className="form-header">
-              <h2>Crear cuenta</h2>
-              <p>Completa la información para registrarte</p>
-            </div>
+        <div className="register-left">
+          <span className="register-welcome">BIENVENIDO A</span>
+          <h1>RentStyle</h1>
+          <p>Alquila lo que necesitas, cuando lo necesitas. Moda, tecnología y más sin el compromiso de comprar.</p>
+          <ul>
+            <li>✦ Catálogo actualizado</li>
+            <li>✦ Reservas flexibles</li>
+            <li>✦ Cancelación sin cargos</li>
+          </ul>
+        </div>
+
+        <div className="register-right">
+          <div className="register-form-container">
+            <h2>Crear cuenta</h2>
 
             <form onSubmit={handleSubmit} noValidate>
 
-              <div className={fieldClass('name')} id="field-name">
+              <div className={fieldClass('name')}>
                 <label htmlFor="name">Nombre completo</label>
                 <div className="input-wrapper">
-                  <span className="input-icon" aria-hidden="true">
+                  <span className="input-icon">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="8" r="4"/>
-                      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                      <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
                     </svg>
                   </span>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    placeholder="Tu nombre completo"
-                    autoComplete="name"
-                    minLength={3}
-                    maxLength={80}
-                    value={formData.name}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    required
-                  />
+                  <input type="text" id="name" name="name" placeholder="Tu nombre completo"
+                    autoComplete="name" minLength={3} maxLength={80}
+                    value={formData.name} onChange={handleChange} onBlur={handleBlur} required />
                 </div>
                 {errors.name && <span className="field-error" role="alert">{errors.name}</span>}
               </div>
 
-              <div className={fieldClass('email')} id="field-email">
+              <div className={fieldClass('email')}>
                 <label htmlFor="email">Correo electrónico</label>
                 <div className="input-wrapper">
-                  <span className="input-icon" aria-hidden="true">
+                  <span className="input-icon">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="2" y="4" width="20" height="16" rx="2"/>
-                      <path d="m2 7 10 7 10-7"/>
+                      <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/>
                     </svg>
                   </span>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="ejemplo@correo.com"
-                    autoComplete="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    required
-                  />
+                  <input type="email" id="email" name="email" placeholder="ejemplo@correo.com"
+                    autoComplete="email" value={formData.email}
+                    onChange={handleChange} onBlur={handleBlur} required />
                 </div>
                 {errors.email && <span className="field-error" role="alert">{errors.email}</span>}
               </div>
 
-              <div className={fieldClass('password')} id="field-password">
+              <div className={fieldClass('password')}>
                 <label htmlFor="password">Contraseña</label>
                 <div className="input-wrapper">
-                  <span className="input-icon" aria-hidden="true">
+                  <span className="input-icon">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="11" width="18" height="11" rx="2"/>
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                      <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                     </svg>
                   </span>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    id="password"
-                    name="password"
-                    placeholder="Mínimo 8 caracteres"
-                    autoComplete="new-password"
-                    minLength={8}
-                    value={formData.password}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="toggle-pw"
+                  <input type={showPassword ? 'text' : 'password'} id="password" name="password"
+                    placeholder="Mínimo 8 caracteres" autoComplete="new-password" minLength={8}
+                    value={formData.password} onChange={handleChange} onBlur={handleBlur} required />
+                  <button type="button" className="toggle-pw"
                     aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                    onClick={() => setShowPassword(prev => !prev)}
-                  >
+                    onClick={() => setShowPassword(p => !p)}>
                     {EyeIcon}
                   </button>
                 </div>
-                {StrengthBars}
+                <div className={`pw-strength${formData.password ? ' visible' : ''}`} aria-live="polite">
+                  <div className="pw-bars">
+                    {[1,2,3,4].map(i => (
+                      <span key={i} className={`bar${i <= pwStrength ? ` ${strengthInfo.cls}` : ''}`} />
+                    ))}
+                  </div>
+                  <span className="pw-label" style={{ color: strengthInfo.color }}>{strengthInfo.label}</span>
+                </div>
                 {errors.password && <span className="field-error" role="alert">{errors.password}</span>}
               </div>
 
-              <div className={fieldClass('confirm')} id="field-confirm">
+              <div className={fieldClass('confirm')}>
                 <label htmlFor="confirm">Confirmar contraseña</label>
                 <div className="input-wrapper">
-                  <span className="input-icon" aria-hidden="true">
+                  <span className="input-icon">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="m9 12 2 2 4-4"/>
-                      <rect x="3" y="11" width="18" height="11" rx="2"/>
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                      <path d="m9 12 2 2 4-4"/><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                     </svg>
                   </span>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    id="confirm"
-                    name="confirm"
-                    placeholder="Repite tu contraseña"
-                    autoComplete="new-password"
-                    value={formData.confirm}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    required
-                  />
+                  <input type={showPassword ? 'text' : 'password'} id="confirm" name="confirm"
+                    placeholder="Repite tu contraseña" autoComplete="new-password"
+                    value={formData.confirm} onChange={handleChange} onBlur={handleBlur} required />
                 </div>
                 {errors.confirm && <span className="field-error" role="alert">{errors.confirm}</span>}
               </div>
 
-              <div className={fieldClass('avatar')} id="field-avatar">
-                <label>
-                  Foto de perfil <span className="optional-tag">Opcional</span>
-                </label>
-                <div
-                  className={`avatar-zone${dragging ? ' dragging' : ''}`}
-                  role="button"
-                  tabIndex={0}
-                  aria-label="Subir foto de perfil"
+              <div className={fieldClass('avatar')}>
+                <label>Foto de perfil <span className="optional-tag">Opcional</span></label>
+                <div className={`avatar-zone${dragging ? ' dragging' : ''}`}
+                  role="button" tabIndex={0} aria-label="Subir foto de perfil"
                   onClick={() => avatarInputRef.current?.click()}
-                  onKeyDown={handleAvatarKeyDown}
+                  onKeyDown={(e) => { if (e.key==='Enter'||e.key===' ') { e.preventDefault(); avatarInputRef.current?.click(); }}}
                   onDragEnter={(e) => { e.preventDefault(); setDragging(true); }}
                   onDragOver={(e)  => { e.preventDefault(); setDragging(true); }}
                   onDragLeave={() => setDragging(false)}
-                  onDrop={handleDrop}
-                >
+                  onDrop={handleDrop}>
                   <div className="avatar-preview-wrap">
                     {avatarSrc ? (
-                      <img
-                        src={avatarSrc}
-                        alt="Vista previa del avatar"
-                        style={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block', borderRadius: 'var(--radius-md)' }}
-                      />
+                      <img src={avatarSrc} alt="Vista previa" style={{ width:'100%', maxHeight:200, objectFit:'cover', display:'block', borderRadius:'14px' }} />
                     ) : (
                       <div className="avatar-placeholder">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="8" r="4"/>
-                          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
                         </svg>
                         <p>Haz clic o arrastra una imagen</p>
                         <span>JPG, PNG o WEBP · Máx. 5 MB</span>
                       </div>
                     )}
                   </div>
-                  <input
-                    ref={avatarInputRef}
-                    type="file"
-                    id="avatar"
-                    name="avatar"
-                    accept="image/jpeg,image/png,image/webp"
-                    aria-hidden="true"
-                    tabIndex={-1}
-                    onChange={handleAvatarChange}
-                    style={{ display: 'none' }}
-                  />
+                  <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp"
+                    aria-hidden="true" tabIndex={-1} onChange={(e) => handleAvatarFile(e.target.files?.[0])}
+                    style={{ display:'none' }} />
                 </div>
                 {errors.avatar && <span className="field-error" role="alert">{errors.avatar}</span>}
               </div>
 
-              <div className={fieldClass('terms')} id="field-terms">
+              <div className={fieldClass('terms')}>
                 <label className="check-label">
-                  <input
-                    type="checkbox"
-                    id="terms"
-                    name="terms"
-                    checked={formData.terms}
-                    onChange={handleChange}
-                    required
-                  />
+                  <input type="checkbox" id="terms" name="terms"
+                    checked={formData.terms} onChange={handleChange} required />
                   <span className="check-box" aria-hidden="true" />
                   <span>
                     Acepto los{' '}
@@ -466,11 +339,7 @@ export default function Register() {
                 {errors.terms && <span className="field-error" role="alert">{errors.terms}</span>}
               </div>
 
-              <button
-                type="submit"
-                className={`btn-submit${loading ? ' loading' : ''}`}
-                disabled={loading}
-              >
+              <button type="submit" className={`btn-submit${loading ? ' loading' : ''}`} disabled={loading}>
                 <span className="btn-text">{loading ? 'Creando cuenta…' : 'Crear cuenta'}</span>
                 <span className="btn-spinner" aria-hidden="true" />
               </button>
@@ -482,14 +351,12 @@ export default function Register() {
               <a href="/login" className="link">Inicia sesión</a>
             </p>
           </div>
-        </section>
-      </main>
+        </div>
+      </div>
 
-      <div
-        className={`toast${toast.show ? ' show' : ''} ${toast.type}`}
-        role="status"
-        aria-live="polite"
-      >
+      <Footer />
+
+      <div className={`toast${toast.show ? ' show' : ''} ${toast.type}`} role="status" aria-live="polite">
         {toast.msg}
       </div>
     </>
