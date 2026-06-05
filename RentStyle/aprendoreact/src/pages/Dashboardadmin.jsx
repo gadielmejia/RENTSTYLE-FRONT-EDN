@@ -155,7 +155,6 @@ function DashboardAdmin() {
 
   return (
     <>
-    <Nav/>
     <div className="dashboard-container">
       <div className="dashboard-header">
         <h1>Dashboard Administrador</h1>

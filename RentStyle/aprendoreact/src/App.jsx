@@ -6,6 +6,8 @@ import Register from './pages/register';
 import Login from './pages/Login';
 import DashboardAdmin from './pages/Dashboardadmin';
 import DashboardUser from './pages/DashboardUser';
+import Cart from './pages/Cart';
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
         <Route path="/user" element={<h1>User</h1>} />
         <Route path="/dashboardadmin" element={<DashboardAdmin />} />
         <Route path="/dashboarduser" element={<DashboardUser />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </BrowserRouter>
   );

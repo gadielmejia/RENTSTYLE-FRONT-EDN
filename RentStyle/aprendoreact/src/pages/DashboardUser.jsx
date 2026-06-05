@@ -109,7 +109,7 @@ function DashboardUser() {
                   1,
                   "Vestido de Gala Verde Jade",
                   180000,
-                  "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=800"
+                  vestidoverde
                 )
               }
             >
@@ -137,7 +137,7 @@ function DashboardUser() {
                   2,
                   "Vestido Elegante Negro",
                   150000,
-                  "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=800"
+                  vestidonegro
                 )
               }
             >

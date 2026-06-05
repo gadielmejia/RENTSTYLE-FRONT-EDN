@@ -1,5 +1,4 @@
 import Nav from "./Nav";
-import Footer from "./Footer";
 
 function Inicio() {
     return (
@@ -18,7 +17,6 @@ function Inicio() {
             </div>
             </div>
         </section>
-        <Footer/>
         </>
     );
 }
