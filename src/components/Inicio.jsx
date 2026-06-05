@@ -13,7 +13,7 @@ function Inicio() {
             </div>
             <div className="hero-tag">
                 <h3>Tu armario premium </h3>
-                <p>Explora tus looks de gala, cóctel y eventos especiales con colores suaves y detalles cuidadosamente pensados.</p>
+                <p>Explora tus looks de gala, cóctel y eventos especiales con colores suaves y detalles cuidadosamente pensados</p>
             </div>
             </div>
         </section>
